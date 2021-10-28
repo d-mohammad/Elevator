@@ -1,0 +1,14 @@
+C:\Users\dania\source\repos\Elevator-Ellevation\Elevator-Ellevation\bin\Debug\netcoreapp3.1\Elevator-Ellevation.exe
+C:\Users\dania\source\repos\Elevator-Ellevation\Elevator-Ellevation\bin\Debug\netcoreapp3.1\Elevator-Ellevation.deps.json
+C:\Users\dania\source\repos\Elevator-Ellevation\Elevator-Ellevation\bin\Debug\netcoreapp3.1\Elevator-Ellevation.runtimeconfig.json
+C:\Users\dania\source\repos\Elevator-Ellevation\Elevator-Ellevation\bin\Debug\netcoreapp3.1\Elevator-Ellevation.runtimeconfig.dev.json
+C:\Users\dania\source\repos\Elevator-Ellevation\Elevator-Ellevation\bin\Debug\netcoreapp3.1\Elevator-Ellevation.dll
+C:\Users\dania\source\repos\Elevator-Ellevation\Elevator-Ellevation\bin\Debug\netcoreapp3.1\Elevator-Ellevation.pdb
+C:\Users\dania\source\repos\Elevator-Ellevation\Elevator-Ellevation\obj\Debug\netcoreapp3.1\Elevator-Ellevation.csproj.AssemblyReference.cache
+C:\Users\dania\source\repos\Elevator-Ellevation\Elevator-Ellevation\obj\Debug\netcoreapp3.1\Elevator-Ellevation.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\dania\source\repos\Elevator-Ellevation\Elevator-Ellevation\obj\Debug\netcoreapp3.1\Elevator-Ellevation.AssemblyInfoInputs.cache
+C:\Users\dania\source\repos\Elevator-Ellevation\Elevator-Ellevation\obj\Debug\netcoreapp3.1\Elevator-Ellevation.AssemblyInfo.cs
+C:\Users\dania\source\repos\Elevator-Ellevation\Elevator-Ellevation\obj\Debug\netcoreapp3.1\Elevator-Ellevation.csproj.CoreCompileInputs.cache
+C:\Users\dania\source\repos\Elevator-Ellevation\Elevator-Ellevation\obj\Debug\netcoreapp3.1\Elevator-Ellevation.dll
+C:\Users\dania\source\repos\Elevator-Ellevation\Elevator-Ellevation\obj\Debug\netcoreapp3.1\Elevator-Ellevation.pdb
+C:\Users\dania\source\repos\Elevator-Ellevation\Elevator-Ellevation\obj\Debug\netcoreapp3.1\Elevator-Ellevation.genruntimeconfig.cache
