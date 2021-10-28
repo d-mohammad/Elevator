@@ -10,6 +10,8 @@ namespace Elevator_Ellevation
 
 		Up = 2,
 
-		Down = 3
+		Down = 3,
+
+		Waiting = 4
 	}
 }

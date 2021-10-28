@@ -8,42 +8,88 @@ namespace Elevator_Ellevation
 {
 	class ElevatorQueue
 	{
-		public List<QueueObject> Queue { get; set; }
+		//request queue needs to know the origination of the request and which direction they want to go
+		public List<QueueObject> RequestQueue { get; set; }
+
+		//destination just needs to be a list of floors that the elevator has to stop at on its way.
+		public List<int> DestinationQueue { get; set; }
 
 		public ElevatorQueue()
 		{
-			Queue = new List<QueueObject>();	
+			RequestQueue = new List<QueueObject>();
+			DestinationQueue = new List<int>();
 		}
 
-		public void AddToQueue(int originFloor, int destinationFloor)
-		{
-			if (originFloor == destinationFloor)
-			{
-				return;
-			}
-
-			this.Queue.Add(new QueueObject
+		public void AddToRequestQueue(int originFloor, ElevatorStatusEnum direction)
+		{			
+			this.RequestQueue.Add(new QueueObject
 			{
 				OriginFloor = originFloor,
-				DestinationFloor = destinationFloor,
-				Direction = originFloor > destinationFloor ? ElevatorStatusEnum.Down : ElevatorStatusEnum.Up
+				Direction = direction
 			});
 		}
 
-		public int FindNextStop(int currentFloor, ElevatorStatusEnum direction)
+		public void AddToDestinationQueue(int destinationFloor)
+		{
+			this.DestinationQueue.Add(destinationFloor);
+		}
+
+		public (int, bool) FindNextStop(int currentFloor, ElevatorStatusEnum direction)
 		{
 			//default next stop to floor 0
-			var nextStop = 0;
+			int nextRequest = 0;
+			int nextDestination = 0;
+			int nextStop = 0;
+			bool isDestination = false;
+
+			//improve the logic of choosing which to go to next.
 			if (direction == ElevatorStatusEnum.Up)
 			{
-				nextStop = Queue.Where(x => x.OriginFloor >= currentFloor && x.Direction == ElevatorStatusEnum.Up).OrderBy(x => x.OriginFloor - currentFloor).Select(x => x.DestinationFloor).FirstOrDefault();
+				nextRequest = RequestQueue.Where(x => x.OriginFloor >= currentFloor && x.Direction == ElevatorStatusEnum.Up).OrderBy(x => x.OriginFloor - currentFloor).Select(x => x.OriginFloor).FirstOrDefault();
+				nextDestination = DestinationQueue.Where(x => x >= currentFloor).OrderBy(x => x - currentFloor).Select(x => x).FirstOrDefault();
+				
+				if (nextRequest < nextDestination && nextRequest != 0)
+				{
+					nextStop = nextRequest;
+					isDestination = false;
+				}
+				else
+				{
+					nextStop = nextDestination;
+					isDestination = true;
+				}
 			}
 			else
 			{
-				nextStop = Queue.Where(x => x.OriginFloor <= currentFloor && x.Direction == ElevatorStatusEnum.Down).OrderBy(x => currentFloor - x.OriginFloor).Select(x => x.DestinationFloor).FirstOrDefault();
+				nextRequest = RequestQueue.Where(x => x.OriginFloor <= currentFloor && x.Direction == ElevatorStatusEnum.Down).OrderBy(x => currentFloor - x.OriginFloor).Select(x => x.OriginFloor).FirstOrDefault();
+				nextDestination = DestinationQueue.Where(x => x <= currentFloor).OrderBy(x => currentFloor - x).Select(x => x).FirstOrDefault();
+
+				if (nextRequest > nextDestination && nextRequest != 0)
+				{
+					nextStop = nextRequest;
+					isDestination = false;
+				}
+				else 
+				{
+					nextStop = nextDestination;
+					isDestination = true;
+				}
 			}
 
-			return nextStop;
+			
+
+			if (nextDestination > 0 && nextRequest == 0 && nextStop == 0)
+			{
+				isDestination = true;
+				nextStop = nextDestination;
+			}
+			else if (nextRequest > 0 && nextDestination == 0 && nextStop == 0)
+			{
+				isDestination = false;
+				nextStop = nextRequest;
+			}
+			
+			return (nextStop, isDestination);
 		}
 	}
 }

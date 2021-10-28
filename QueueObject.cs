@@ -10,7 +10,5 @@ namespace Elevator_Ellevation
 		public ElevatorStatusEnum Direction { get; set; }
 
 		public int OriginFloor { get; set; }
-
-		public int DestinationFloor { get; set; }
 	}
 }
