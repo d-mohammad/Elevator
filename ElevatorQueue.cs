@@ -59,13 +59,13 @@ namespace Elevator_Ellevation
 			int nextDestination = 0;
 			int nextStop = 0;
 			bool isDestination = false;
-		
+
 			//compare the next request vs next destination to know which to go to next, depending on direction
 			if (direction == ElevatorStatus.Up)
 			{
 				nextRequest = RequestQueue.Where(x => x.OriginFloor >= currentFloor && x.Direction == ElevatorStatus.Up).OrderBy(x => x.OriginFloor - currentFloor).Select(x => x.OriginFloor).FirstOrDefault();
 				nextDestination = DestinationQueue.Where(x => x >= currentFloor).OrderBy(x => x - currentFloor).Select(x => x).FirstOrDefault();
-				
+
 				if (nextRequest < nextDestination && nextRequest != 0)
 				{
 					nextStop = nextRequest;
@@ -77,7 +77,7 @@ namespace Elevator_Ellevation
 					isDestination = true;
 				}
 			}
-			else
+			else if (direction == ElevatorStatus.Down)
 			{
 				nextRequest = RequestQueue.Where(x => x.OriginFloor <= currentFloor && x.Direction == ElevatorStatus.Down).OrderBy(x => currentFloor - x.OriginFloor).Select(x => x.OriginFloor).FirstOrDefault();
 				nextDestination = DestinationQueue.Where(x => x <= currentFloor).OrderBy(x => currentFloor - x).Select(x => x).FirstOrDefault();
@@ -87,12 +87,53 @@ namespace Elevator_Ellevation
 					nextStop = nextRequest;
 					isDestination = false;
 				}
-				else 
+				else
 				{
 					nextStop = nextDestination;
 					isDestination = true;
 				}
 			}
+			else //mean it passed in with Idle
+			{
+				nextRequest = RequestQueue.Where(x => x.OriginFloor >= currentFloor && x.Direction == ElevatorStatus.Down).OrderBy(x => x.OriginFloor - currentFloor).Select(x => x.OriginFloor).FirstOrDefault();
+				nextDestination = DestinationQueue.Where(x => x >= currentFloor).OrderBy(x => x - ElevatorStatus.Down).Select(x => x).FirstOrDefault();
+
+				if (nextRequest > 0 || nextDestination > 0)
+				{
+					//we found a stop going down
+					if (nextRequest > nextDestination && nextRequest != 0)
+					{
+						nextStop = nextRequest;
+						isDestination = false;
+					}
+					else
+					{
+						nextStop = nextDestination;
+						isDestination = true;
+					}
+				}
+				else
+				{
+					nextRequest = RequestQueue.Where(x => x.OriginFloor >= currentFloor && x.Direction == ElevatorStatus.Up).OrderBy(x => x.OriginFloor - currentFloor).Select(x => x.OriginFloor).FirstOrDefault();
+					nextDestination = DestinationQueue.Where(x => x >= currentFloor).OrderBy(x => x - ElevatorStatus.Up).Select(x => x).FirstOrDefault();
+
+					if (nextRequest > 0 || nextDestination > 0)
+					{
+						//we found a stop going down
+						if (nextRequest < nextDestination && nextRequest != 0)
+						{
+							nextStop = nextRequest;
+							isDestination = false;
+						}
+						else
+						{
+							nextStop = nextDestination;
+							isDestination = true;
+						}
+					}
+				}				
+			}
+
 		
 			if (nextDestination > 0 && nextRequest == 0 && nextStop == 0)
 			{
