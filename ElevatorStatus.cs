@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Elevator_Ellevation
 {
-	enum ElevatorStatusEnum
+	enum ElevatorStatus
 	{
 		Idle = 1,
 

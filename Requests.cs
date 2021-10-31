@@ -5,9 +5,9 @@ using System.Text;
 
 namespace Elevator_Ellevation
 {
-	class QueueObject
+	class Requests
 	{
-		public ElevatorStatusEnum Direction { get; set; }
+		public ElevatorStatus Direction { get; set; }
 
 		public int OriginFloor { get; set; }
 	}

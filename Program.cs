@@ -15,10 +15,10 @@ namespace Elevator_Ellevation
             var destinationQueue = new List<int>();
 
             var pub = new Publisher();
-            var sub1 = new Subscriber(pub);
+            var sub = new Subscriber(pub);
 
             //add to queue and make sure it handles and logs the stops of the elevator as it moves
-            sub1.Publisher.Handler += delegate (object sender, MoveCommand command)
+            sub.Publisher.Handler += delegate (object sender, MoveCommand command)
             {
                 //if on the same floor, the user needs to input a new floor now
                 if (command.OriginFloor == elevator.CurrentFloor)
@@ -36,7 +36,7 @@ namespace Elevator_Ellevation
                 }
                 
 
-                if (elevator.status == ElevatorStatusEnum.Idle)
+                if (elevator.Status == ElevatorStatus.Idle)
 				{
                     Task.Run(() => elevator.MoveElevator(elevatorQueue));
 				}
@@ -48,7 +48,7 @@ namespace Elevator_Ellevation
             while (true)
             {                
                 //if the elevator is waiting for a requests' input, we avoid this running again to avoid multiple input issues in console
-                if (elevator.status != ElevatorStatusEnum.Waiting)
+                if (elevator.Status != ElevatorStatus.Waiting)
                 {
                     try
                     {
@@ -62,15 +62,15 @@ namespace Elevator_Ellevation
                             var destionationString = splitData[1];
 
                             //setting to idle as default. this logic would need some updating
-                            ElevatorStatusEnum direction = ElevatorStatusEnum.Idle;
+                            ElevatorStatus direction = ElevatorStatus.Idle;
 
                             if (destionationString == "u")
                             {
-                                direction = ElevatorStatusEnum.Up;
+                                direction = ElevatorStatus.Up;
                             }
                             else if (destionationString == "d")
                             {
-                                direction = ElevatorStatusEnum.Down;
+                                direction = ElevatorStatus.Down;
                             }
 
                             //publish the event to trigger adding it to the queue and to move the elevator if it's idle
@@ -86,12 +86,12 @@ namespace Elevator_Ellevation
                     }
                     catch (InvalidOperationException)
 					{
-
+                        //just catch and allow to continue (raised from canceling the console read in Elevator.cs
 					}
                     catch (OperationCanceledException)
 					{
-
-					}
+                        //just catch and allow to continue (raised from canceling the console read in Elevator.cs
+                    }
                 } 
                 
                 Thread.Sleep(1000);
@@ -103,9 +103,9 @@ namespace Elevator_Ellevation
     class MoveCommand
     {
         public int OriginFloor;
-        public ElevatorStatusEnum Direction;
+        public ElevatorStatus Direction;
 
-        public MoveCommand(int originFloor, ElevatorStatusEnum direction)
+        public MoveCommand(int originFloor, ElevatorStatus direction)
         {
             this.OriginFloor = originFloor;
             this.Direction = direction;
@@ -115,7 +115,7 @@ namespace Elevator_Ellevation
     interface IPublisher
     {
         event EventHandler<MoveCommand> Handler;
-        void Publish(int originFloor, ElevatorStatusEnum direction);
+        void Publish(int originFloor, ElevatorStatus direction);
     }
 
     class Publisher : IPublisher
@@ -127,7 +127,7 @@ namespace Elevator_Ellevation
             Handler?.Invoke(this, msg);
         }
 
-        public void Publish(int originFloor, ElevatorStatusEnum direction)
+        public void Publish(int originFloor, ElevatorStatus direction)
         {
             MoveCommand msg = (MoveCommand)Activator.CreateInstance(typeof(MoveCommand), originFloor, direction);
             OnPublish(msg);
