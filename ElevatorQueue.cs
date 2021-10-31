@@ -34,6 +34,16 @@ namespace Elevator_Ellevation
 			this.DestinationQueue.Add(destinationFloor);
 		}
 
+		public bool IsEmpty()
+		{
+			if (this.DestinationQueue.Count == 0 && this.RequestQueue.Count == 0)
+			{
+				return true;
+			}
+
+			return false;
+		}
+
 		public (int, bool) FindNextStop(int currentFloor, ElevatorStatusEnum direction)
 		{
 			//default next stop to floor 0

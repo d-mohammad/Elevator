@@ -43,12 +43,16 @@ namespace Elevator_Ellevation
             };
 
             Console.Write("OriginFloor Direction (enter with a space): ");
+            
+            //make sure to always be checking for inputs
             while (true)
-            {
+            {                
+                //if the elevator is waiting for a requests' input, we avoid this running again to avoid multiple input issues in console
                 if (elevator.status != ElevatorStatusEnum.Waiting)
                 {
                     try
-                    {                        
+                    {
+                        //get int and string indicating the floor of origin and up or down request
                         var input = Console.ReadLine();
                         if (!string.IsNullOrEmpty(input))
                         {
@@ -69,6 +73,7 @@ namespace Elevator_Ellevation
                                 direction = ElevatorStatusEnum.Down;
                             }
 
+                            //publish the event to trigger adding it to the queue and to move the elevator if it's idle
                             if (originFloor >= elevator.LowestFloor && originFloor <= elevator.HighestFloor)
                             {
                                 pub.Publish(originFloor, direction);

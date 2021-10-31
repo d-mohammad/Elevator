@@ -53,8 +53,7 @@ namespace Elevator_Ellevation
 
 			(var nextStop, var isDestination) = queue.FindNextStop(this.CurrentFloor, this.status);
 
-			//current issue is that it will stop at all requests along the way IF they are all input before it starts moving. if not, it will move to the destination first.
-			while (queue.RequestQueue.Count > 0 || queue.DestinationQueue.Count > 0)
+			while (!queue.IsEmpty())
 			{			
 				if (nextStop > this.CurrentFloor)
 				{
@@ -64,22 +63,19 @@ namespace Elevator_Ellevation
 				{
 					this.status = ElevatorStatusEnum.Down;
 				}
-				
-				////check for any new updates to 
-				//var floorsToTravel = Math.Abs(this.CurrentFloor - nextStop - 1);
-				//for (var i = 1; i < floorsToTravel + 1; i++)
-				//{
-					
-					//while the elevator is traveling to the destination, we want to check if any new request has come in along the way
-					//if there are no changes, the elevator continues
+							
+				//before the elevator starts moving, make sure to check if any there are any stops on the way
 				(var newStop, var newIsDestination) = queue.FindNextStop(this.CurrentFloor, this.status);					
 
+				//if the old stop is no longer here, remove update to the new stop we found along the way
+				//the cause of this is reaching going to the end of one direction and swapping, which throws things off currently
 				if (!queue.DestinationQueue.Any(x => x == nextStop) && !queue.RequestQueue.Any(x => x.OriginFloor == nextStop && x.Direction == this.status))
 				{
 					nextStop = newStop;
 					isDestination = newIsDestination;
 				}
 
+				//check if there's a newer stop along the way
 				if (newStop > 0 && this.status == ElevatorStatusEnum.Up && newStop < nextStop)
 				{
 					nextStop = newStop;
@@ -140,7 +136,7 @@ namespace Elevator_Ellevation
 				(nextStop, isDestination) = queue.FindNextStop(this.CurrentFloor, this.status);
 
 				//if we can't find a floor going in the current direction, but we still have something in the queue, we need to reverse direction
-				if (nextStop == 0)
+				if (nextStop == 0 && !queue.IsEmpty())
 				{
 					if (this.status == ElevatorStatusEnum.Up)
 					{
@@ -174,9 +170,7 @@ namespace Elevator_Ellevation
 				else if (this.status == ElevatorStatusEnum.Up)
 				{
 					this.CurrentFloor++;
-				}
-					
-				//}															
+				}				
 			}
 
 			//delay before resetting the elevator			
@@ -188,9 +182,6 @@ namespace Elevator_Ellevation
 		public void ResetElevator()
 		{
 			this.status = ElevatorStatusEnum.Idle;
-			
-			
-			Console.Write("Origin Floor: ");
 		}
 	}
 }
