@@ -34,12 +34,13 @@ namespace Elevator_Ellevation
 		//starts to move the elevator and continues until nothing is left in the request or destination queue
 		public async Task MoveElevator(ElevatorQueue queue)
 		{
+			//find the initial stop for the elevator
+			(var nextStop, var isDestination) = queue.FindNextStop(this.CurrentFloor, this.Direction, this.Status);
+
 			//keep moving the elevator until there is nothing left in the queue
 			while (!queue.IsEmpty())
-			{				
-				//before the elevator starts moving, make sure to check if any there are any stops on the way
-				(var nextStop, var isDestination) = queue.FindNextStop(this.CurrentFloor, this.Direction, this.Status);
-
+			{
+				//set the direction and map the status of the elevator
 				if (nextStop > this.CurrentFloor)
 				{
 					this.Direction = ElevatorDirection.Up;
@@ -60,12 +61,13 @@ namespace Elevator_Ellevation
 					this.Status = ElevatorStatus.ServicingRequest;
 				}
 
+				//if it can't find a next stop, exit
 				if (nextStop == 0)
 				{
-					continue;
+					break;
 				}
 
-				//increment the floor count and print
+				//increment the floor count and print, assuming we didn't reach the destination
 				if (this.CurrentFloor != nextStop)
 				{
 					Console.WriteLine("Elevator moving past floor " + this.CurrentFloor.ToString());
@@ -80,31 +82,28 @@ namespace Elevator_Ellevation
 						this.CurrentFloor++;
 					}
 				}
-				//print arrival to console, update queue, wait for user input if it's a destination
+				//if we've reached a destination from a request, print arrival to console, update queue, wait for user input if it's a destination
 				else if (this.CurrentFloor == nextStop)
 				{
 					this.AnnounceArrival();
 
 					//if this was to service a new request, we have to ask for the user to input a detination floor
-					//queue logic is now too entangled with the elevator - would probably want to split it
 					if (!isDestination)
 					{
 						//set status to waiting so that we don't continue the console requests and potentially have issues with 2 console reads
-						var previousDirection = this.Direction;
+						var previousStatus = this.Status;
 						this.Status = ElevatorStatus.Waiting;
 
 						//have to send a key to break the console readline from Program.cs. Solution found from https://stackoverflow.com/questions/9479573/how-to-interrupt-console-readline
 						CancelConsoleRead();
 
 						//get new input from user and add it to the queue
-						Console.WriteLine("Please enter the destination floor to continue: ");
-						var input = Console.ReadLine();
-						var destinationFloor = int.Parse(input);
+						var destinationFloor = GetDestinationFromRequest();
 
 						queue.DestinationQueue.Add(destinationFloor);
 						queue.RemoveFloorFromRequestQueue(this.CurrentFloor);
 
-						this.Direction = previousDirection;
+						this.Status = previousStatus;
 					}
 					else
 					{
@@ -112,6 +111,7 @@ namespace Elevator_Ellevation
 					}					
 				}
 
+				//delay for ease of inputting other requests
 				Thread.Sleep(1000);
 
 				//find next stop for the next iteration
@@ -133,19 +133,23 @@ namespace Elevator_Ellevation
 						queue.DestinationQueue.Add(destinationFloor);
 					}
 				}
-			}			
+			}
+
+			//set the state of the elevator to idle
+			Console.WriteLine("Elevator now Idle");
+			this.Status = ElevatorStatus.Idle;
+			this.Direction = ElevatorDirection.Idle;
 		}		
 
 		public void AnnounceArrival()
 		{
-			Console.WriteLine();
-			Console.WriteLine("***Elevator arrived at: " + this.CurrentFloor.ToString() + "***");
+			Console.WriteLine(Environment.NewLine + "***Elevator arrived at: " + this.CurrentFloor.ToString() + "***");
 		}
 
 		//we are going to assume this is always a number and input is valid, since it should come from a button in reality
 		public int GetDestinationFromRequest()
 		{
-			Console.WriteLine("Please enter the destination floor to continue: ");
+			Console.WriteLine(Environment.NewLine + "Please enter the destination floor to continue: ");
 			var input = Console.ReadLine();
 
 			return int.Parse(input);

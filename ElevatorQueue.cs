@@ -56,13 +56,6 @@ namespace Elevator_Ellevation
 			this.RequestQueue.RemoveAll(x => x.OriginFloor == floorNumber);
 		}
 
-		public void RemoveFloorFromQueues(int floorNumber)
-		{
-			//in case we have multiple requests to go to one floor, remove it here. this should be improved upon to ensure multiple requests cannot be added to the queue
-			this.RequestQueue.RemoveAll(x => x.OriginFloor == floorNumber);
-			this.DestinationQueue.RemoveAll(x => x == floorNumber);
-		}
-
 		//need to improve the logic of choosing which to go to next.
 		public (int, bool) FindNextStop(int currentFloor, ElevatorDirection direction, ElevatorStatus status)
 		{
