@@ -65,6 +65,7 @@ namespace Elevator_Ellevation
 					continue;
 				}
 
+				//increment the floor count and print
 				if (this.CurrentFloor != nextStop)
 				{
 					Console.WriteLine("Elevator moving past floor " + this.CurrentFloor.ToString());
@@ -79,6 +80,7 @@ namespace Elevator_Ellevation
 						this.CurrentFloor++;
 					}
 				}
+				//print arrival to console, update queue, wait for user input if it's a destination
 				else if (this.CurrentFloor == nextStop)
 				{
 					this.AnnounceArrival();
@@ -112,7 +114,7 @@ namespace Elevator_Ellevation
 
 				Thread.Sleep(1000);
 
-				//find next stop
+				//find next stop for the next iteration
 				(nextStop, isDestination) = queue.FindNextStop(this.CurrentFloor, this.Direction, this.Status);
 
 				//if nextStop == 0 and the queue isn't empty, it means the elevator needs to reverse directions
