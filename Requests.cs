@@ -7,7 +7,7 @@ namespace Elevator_Ellevation
 {
 	class Requests
 	{
-		public ElevatorStatus Direction { get; set; }
+		public ElevatorDirection Direction { get; set; }
 
 		public int OriginFloor { get; set; }
 	}

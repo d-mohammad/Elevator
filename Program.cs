@@ -36,7 +36,7 @@ namespace Elevator_Ellevation
                 }
                 
 
-                if (elevator.Status == ElevatorStatus.Idle)
+                if (elevator.Direction == ElevatorDirection.Idle)
 				{
                     Task.Run(() => elevator.MoveElevator(elevatorQueue));
 				}
@@ -62,15 +62,15 @@ namespace Elevator_Ellevation
                             var destionationString = splitData[1];
 
                             //setting to idle as default. this logic would need some updating
-                            ElevatorStatus direction = ElevatorStatus.Idle;
+                            ElevatorDirection direction = ElevatorDirection.Idle;
 
                             if (destionationString == "u")
                             {
-                                direction = ElevatorStatus.Up;
+                                direction = ElevatorDirection.Up;
                             }
                             else if (destionationString == "d")
                             {
-                                direction = ElevatorStatus.Down;
+                                direction = ElevatorDirection.Down;
                             }
 
                             //publish the event to trigger adding it to the queue and to move the elevator if it's idle
@@ -103,9 +103,9 @@ namespace Elevator_Ellevation
     class MoveCommand
     {
         public int OriginFloor;
-        public ElevatorStatus Direction;
+        public ElevatorDirection Direction;
 
-        public MoveCommand(int originFloor, ElevatorStatus direction)
+        public MoveCommand(int originFloor, ElevatorDirection direction)
         {
             this.OriginFloor = originFloor;
             this.Direction = direction;
@@ -115,7 +115,7 @@ namespace Elevator_Ellevation
     interface IPublisher
     {
         event EventHandler<MoveCommand> Handler;
-        void Publish(int originFloor, ElevatorStatus direction);
+        void Publish(int originFloor, ElevatorDirection direction);
     }
 
     class Publisher : IPublisher
@@ -127,7 +127,7 @@ namespace Elevator_Ellevation
             Handler?.Invoke(this, msg);
         }
 
-        public void Publish(int originFloor, ElevatorStatus direction)
+        public void Publish(int originFloor, ElevatorDirection direction)
         {
             MoveCommand msg = (MoveCommand)Activator.CreateInstance(typeof(MoveCommand), originFloor, direction);
             OnPublish(msg);

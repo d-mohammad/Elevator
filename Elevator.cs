@@ -17,6 +17,7 @@ namespace Elevator_Ellevation
 		static extern bool CancelIoEx(IntPtr handle, IntPtr lpOverlapped);
 
 		public ElevatorStatus Status { get; set; }
+		public ElevatorDirection Direction { get; set; }
 		public int CurrentFloor { get; set; }
 		public int LowestFloor = 1;
 		public int HighestFloor = 10;
@@ -25,7 +26,9 @@ namespace Elevator_Ellevation
 		{
 			//default elevator to status of Idle and starting on the lobby
 			this.Status = ElevatorStatus.Idle;
+			this.Direction = ElevatorDirection.Idle;
 			this.CurrentFloor = this.LowestFloor;
+
 		}
 
 		//starts to move the elevator and continues until nothing is left in the request or destination queue
@@ -35,15 +38,26 @@ namespace Elevator_Ellevation
 			while (!queue.IsEmpty())
 			{				
 				//before the elevator starts moving, make sure to check if any there are any stops on the way
-				(var nextStop, var isDestination) = queue.FindNextStop(this.CurrentFloor, this.Status);
+				(var nextStop, var isDestination) = queue.FindNextStop(this.CurrentFloor, this.Direction, this.Status);
 
 				if (nextStop > this.CurrentFloor)
 				{
-					this.Status = ElevatorStatus.Up;
+					this.Direction = ElevatorDirection.Up;
+					this.Status = ElevatorStatus.MovingToDestination;
 				}
 				else if (nextStop < this.CurrentFloor)
 				{
-					this.Status = ElevatorStatus.Down;
+					this.Direction = ElevatorDirection.Down;
+					this.Status = ElevatorStatus.MovingToDestination;
+				}
+
+				if (isDestination == true)
+				{
+					this.Status = ElevatorStatus.MovingToDestination;
+				}
+				else
+				{
+					this.Status = ElevatorStatus.ServicingRequest;
 				}
 
 				if (nextStop == 0)
@@ -56,11 +70,11 @@ namespace Elevator_Ellevation
 					Console.WriteLine("Elevator moving past floor " + this.CurrentFloor.ToString());
 
 					//update floor number based on direction
-					if (this.Status == ElevatorStatus.Down && this.CurrentFloor != this.LowestFloor)
+					if (this.Direction == ElevatorDirection.Down && this.CurrentFloor != this.LowestFloor)
 					{
 						this.CurrentFloor--;
 					}
-					else if (this.Status == ElevatorStatus.Up && this.CurrentFloor != this.HighestFloor)
+					else if (this.Direction == ElevatorDirection.Up && this.CurrentFloor != this.HighestFloor)
 					{
 						this.CurrentFloor++;
 					}
@@ -74,7 +88,7 @@ namespace Elevator_Ellevation
 					if (!isDestination)
 					{
 						//set status to waiting so that we don't continue the console requests and potentially have issues with 2 console reads
-						var previousDirection = this.Status;
+						var previousDirection = this.Direction;
 						this.Status = ElevatorStatus.Waiting;
 
 						//have to send a key to break the console readline from Program.cs. Solution found from https://stackoverflow.com/questions/9479573/how-to-interrupt-console-readline
@@ -86,18 +100,20 @@ namespace Elevator_Ellevation
 						var destinationFloor = int.Parse(input);
 
 						queue.DestinationQueue.Add(destinationFloor);
+						queue.RemoveFloorFromRequestQueue(this.CurrentFloor);
 
-						this.Status = previousDirection;
+						this.Direction = previousDirection;
 					}
-
-					//in case we have multiple requests to go to one floor, remove it here. this should be improved upon to ensure multiple requests cannot be added to the queue
-					queue.RemoveFloorFromQueues(nextStop, this.Status);
+					else
+					{
+						queue.RemoveFloorFromDestinationQueue(nextStop);
+					}					
 				}
 
 				Thread.Sleep(1000);
 
 				//find next stop
-				(nextStop, isDestination) = queue.FindNextStop(this.CurrentFloor, this.Status);
+				(nextStop, isDestination) = queue.FindNextStop(this.CurrentFloor, this.Direction, this.Status);
 
 				//if nextStop == 0 and the queue isn't empty, it means the elevator needs to reverse directions
 				if (nextStop == 0 && !queue.IsEmpty())
@@ -105,7 +121,7 @@ namespace Elevator_Ellevation
 					this.ReverseDirection();
 
 					//attempt to get the next stop after reversing directions of the elevator
-					(nextStop, isDestination) = queue.FindNextStop(this.CurrentFloor, this.Status);
+					(nextStop, isDestination) = queue.FindNextStop(this.CurrentFloor, this.Direction, this.Status);
 
 					//if it happens to match up, we need to gather the destination from the requester
 					if (nextStop == this.CurrentFloor)
@@ -115,25 +131,8 @@ namespace Elevator_Ellevation
 						queue.DestinationQueue.Add(destinationFloor);
 					}
 				}
-			}
-
-			//don't reset if it's already in an idle state (is already reset)
-			if (this.Status != ElevatorStatus.Idle && this.CurrentFloor != this.LowestFloor)
-			{
-				//if the queue is empty, reset the elevator back to its default position
-				Thread.Sleep(300);
-				ResetElevator(queue);
-			}
-		}
-
-		//set it to an idle status and the default floor
-		public void ResetElevator(ElevatorQueue queue)
-		{
-			Console.WriteLine("Elevator resetting");
-			this.Status = ElevatorStatus.Idle;
-			queue.AddToDestinationQueue(this.LowestFloor);
-			this.MoveElevator(queue);
-		}
+			}			
+		}		
 
 		public void AnnounceArrival()
 		{
@@ -152,13 +151,13 @@ namespace Elevator_Ellevation
 
 		public void ReverseDirection()
 		{
-			if (this.Status == ElevatorStatus.Up)
+			if (this.Direction == ElevatorDirection.Up)
 			{
-				this.Status = ElevatorStatus.Down;
+				this.Direction = ElevatorDirection.Down;
 			}
-			else if (this.Status == ElevatorStatus.Down)
+			else if (this.Direction == ElevatorDirection.Down)
 			{
-				this.Status = ElevatorStatus.Up;
+				this.Direction = ElevatorDirection.Up;
 			}
 		}
 

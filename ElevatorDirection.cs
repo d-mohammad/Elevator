@@ -4,14 +4,12 @@ using System.Text;
 
 namespace Elevator_Ellevation
 {
-	enum ElevatorStatus
+	enum ElevatorDirection
 	{
-		Idle = 1,
+		Up = 1,
 
-		Waiting = 2,
+		Down = 2,
 
-		ServicingRequest = 3,
-
-		MovingToDestination = 4
+		Idle = 3
 	}
 }
